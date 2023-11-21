@@ -44,19 +44,19 @@ public interface UserService extends IService<UserDO> {
     void update(UserUpdateReqDTO requestParam);
 
     /**
-     * 用户登陆
+     * 用户登录
      *
-     * @param requestParam 用户登陆请求参数
-     * @return 用户登陆返回参数
+     * @param requestParam 用户登录请求参数
+     * @return 用户登录返回参数
      */
     UserLoginRespDTO login(UserLoginReqDTO requestParam);
 
     /**
-     * 检查用户是否登陆
+     * 检查用户是否登录
      *
      * @param username 用户名
      * @param token    用户 token
-     * @return 用户是否登陆标识
+     * @return 用户是否登录标识
      */
     Boolean checkLogin(String username, String token);
 
