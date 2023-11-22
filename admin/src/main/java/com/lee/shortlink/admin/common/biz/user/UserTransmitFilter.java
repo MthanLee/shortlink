@@ -40,10 +40,10 @@ public class UserTransmitFilter implements Filter {
         String requestURI = httpServletRequest.getRequestURI();
         if (!IGNORE_URI.contains(requestURI)) {
             String method = httpServletRequest.getMethod();
-            if (Objects.equals(requestURI, "/api/short-link/admin/v1/user") && Objects.equals(method, "POST")) {
+            if (!(Objects.equals(requestURI, "/api/short-link/admin/v1/user") && Objects.equals(method, "POST"))) {
                 String username = httpServletRequest.getHeader("username");
                 String token = httpServletRequest.getHeader("token");
-                if (!StrUtil.isAllNotBlank()) {
+                if (!StrUtil.isAllNotBlank(username, token)) {
                     returnJson((HttpServletResponse) servletResponse, JSON.toJSONString(Results.failure(new ClientException(USER_TOKEN_FAIL))));
                     return;
                 }
@@ -51,7 +51,7 @@ public class UserTransmitFilter implements Filter {
                 try {
                     userInfoJsonStr = stringRedisTemplate.opsForHash().get("login_" + username, token);
                     if (userInfoJsonStr == null) {
-                        new ClientException(USER_TOKEN_FAIL);
+                        throw new ClientException(USER_TOKEN_FAIL);
                     }
                 } catch (Exception ex) {
                     returnJson((HttpServletResponse) servletResponse, JSON.toJSONString(Results.failure(new ClientException(USER_TOKEN_FAIL))));
@@ -76,7 +76,6 @@ public class UserTransmitFilter implements Filter {
         try {
             writer = response.getWriter();
             writer.print(json);
-
         } catch (IOException e) {
         } finally {
             if (writer != null)
