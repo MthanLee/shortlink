@@ -21,6 +21,7 @@ import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +29,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static com.lee.shortlink.admin.common.constant.RedisCacheConstant.LOCK_USER_REGISTER_KEY;
-import static com.lee.shortlink.admin.common.enums.UserErrorCodeEnum.USER_NAME_EXIST;
-import static com.lee.shortlink.admin.common.enums.UserErrorCodeEnum.USER_SAVE_ERROR;
+import static com.lee.shortlink.admin.common.enums.UserErrorCodeEnum.*;
 
 /**
  * 用户接口实现层
@@ -39,9 +39,7 @@ import static com.lee.shortlink.admin.common.enums.UserErrorCodeEnum.USER_SAVE_E
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
 
     private final RBloomFilter<String> userRegisterCachePenetrationBloomFilter;
-
     private final RedissonClient redissonClient;
-
     private final StringRedisTemplate stringRedisTemplate;
 
     @Override
@@ -70,9 +68,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         RLock lock = redissonClient.getLock(LOCK_USER_REGISTER_KEY + requestParam.getUsername());
         try {
             if (lock.tryLock()) {
-                int inserted = baseMapper.insert(BeanUtil.toBean(requestParam, UserDO.class));
-                if (inserted < 1) {
-                    throw new ClientException(USER_SAVE_ERROR);
+                try {
+                    int inserted = baseMapper.insert(BeanUtil.toBean(requestParam, UserDO.class));
+                    if (inserted < 1) {
+                        throw new ClientException(USER_SAVE_ERROR);
+                    }
+                } catch (DuplicateKeyException ex) {
+                    throw new ClientException(USER_EXIST);
                 }
                 userRegisterCachePenetrationBloomFilter.add(requestParam.getUsername());
                 return;
@@ -118,7 +120,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public void logout(String username, String token) {
-        if(checkLogin(username, token)){
+        if (checkLogin(username, token)) {
             stringRedisTemplate.delete("login_" + username);
             return;
         }
