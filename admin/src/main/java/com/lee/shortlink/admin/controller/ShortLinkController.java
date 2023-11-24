@@ -19,7 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ShortLinkController {
 
-    ShortLinkRemoteService shortLinkRemoteService = new ShortLinkRemoteService() {};
+    /**
+     * TODO 后续重构为SpringCloud Feign
+     */
+    ShortLinkRemoteService shortLinkRemoteService = new ShortLinkRemoteService() {
+    };
 
     /**
      * 创建短链接
@@ -36,4 +40,5 @@ public class ShortLinkController {
     public Result<IPage<ShortLinkPageRespDTO>> pageShortLink(ShortLinkPageReqDTO requestParam) {
         return shortLinkRemoteService.pageShortLink(requestParam);
     }
+
 }
