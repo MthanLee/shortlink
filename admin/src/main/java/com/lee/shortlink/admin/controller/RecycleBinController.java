@@ -8,6 +8,7 @@ import com.lee.shortlink.admin.remote.dto.ShortLinkRemoteService;
 import com.lee.shortlink.admin.remote.dto.req.RecycleBinSaveReqDTO;
 import com.lee.shortlink.admin.remote.dto.req.ShortLinkRecycleBinPageReqDTO;
 import com.lee.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
+import com.lee.shortlink.admin.service.RecycleBinService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 public class RecycleBinController {
+
+    private final RecycleBinService recycleBinService;
 
     /**
      * TODO 后续重构为SpringCloud Feign
@@ -41,7 +44,7 @@ public class RecycleBinController {
      */
     @GetMapping("/api/short-link/admin/v1/recycle-bin/page")
     public Result<IPage<ShortLinkPageRespDTO>> pageShortLink(ShortLinkRecycleBinPageReqDTO requestParam) {
-        return shortLinkRemoteService.pageRecycleBinShortLink(requestParam);
+        return recycleBinService.pageRecycleBinShortLink(requestParam);
     }
 
 }
